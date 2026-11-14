@@ -305,6 +305,7 @@ function cutBg(url){return new Promise(res=>{const im=new Image();im.onerror=()=
   if(removed<w*h*.05)return res(url);
   for(let p=0;p<w*h;p++)if(!seen[p]){const px=p%w,py=(p-px)/w;if((px>0&&seen[p-1])||(px<w-1&&seen[p+1])||(py>0&&seen[p-w])||(py<h-1&&seen[p+w]))d[p*4+3]=150}
   x.putImageData(id,0,0);res(c.toDataURL('image/png'))}catch(e){res(url)}};im.src=url})}
+function setH(el,h){if(el._h===h)return false;el._h=h;el.innerHTML=h;return true}
 function ask(msg){return new Promise(res=>{const d=$('cf');$('cfm').textContent=msg;let done=false;const end=v=>{if(done)return;done=true;try{d.close()}catch(e){}res(v)};$('cfOk').onclick=()=>end(true);$('cfNo').onclick=()=>end(false);d.oncancel=e=>{e.preventDefault();end(false)};d.showModal();$('cfNo').focus()})}
 let tt;const toast=m=>{const el=$('toast');el.textContent=m;el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),1800)};
 
@@ -314,10 +315,10 @@ function render(){
   $('b-ta').classList.toggle('on',lang==='ta');$('b-en').classList.toggle('on',lang==='en');
   document.querySelectorAll('[data-i]').forEach(n=>n.textContent=t(n.dataset.i));
   $('save').textContent=t(editId?'upd':'add');$('q').placeholder=t('search');
-  $('fsel').innerHTML=S.funcs.map(f=>`<option value="${f.id}"${f.id===S.cur?' selected':''}>${esc(fname(f))}${f.date?' ('+esc(f.date)+')':''}</option>`).join('');
-  const rv=$('rel').value;$('rel').innerHTML=R.map(r=>`<option value="${r[0]}">${r[lang==='ta'?1:2]}</option>`).join('');$('rel').value=rv||'relative';
-  const tv=$('fdType').value;$('fdType').innerHTML=typeOpts();if(tv)$('fdType').value=tv;
-  const gv=$('gt').value;$('gt').innerHTML=`<option value="">${t('gNone')}</option>`+G.map(g=>`<option value="${g[0]}">${g[lang==='ta'?1:2]}</option>`).join('');$('gt').value=gv;
+  setH($('fsel'),S.funcs.map(f=>`<option value="${f.id}"${f.id===S.cur?' selected':''}>${esc(fname(f))}${f.date?' ('+esc(f.date)+')':''}</option>`).join(''));
+  const rv=$('rel').value;if(setH($('rel'),R.map(r=>`<option value="${r[0]}">${r[lang==='ta'?1:2]}</option>`).join('')))$('rel').value=rv||'relative';
+  const tv=$('fdType').value;if(setH($('fdType'),typeOpts())&&tv)$('fdType').value=tv;
+  const gv=$('gt').value;if(setH($('gt'),`<option value="">${t('gNone')}</option>`+G.map(g=>`<option value="${g[0]}">${g[lang==='ta'?1:2]}</option>`).join('')))$('gt').value=gv;
   const L=cur(),C=L.filter(e=>e.amt>0),tot=L.reduce((s,e)=>s+e.amt,0),cl=L.filter(e=>rinfo(e.rel)[3]>0).reduce((s,e)=>s+e.amt,0);
   $('sum').innerHTML=`<div><small>${t('total')}</small><span class="big">${fmt(tot)}</span></div>
    <div class="stat"><small>${t('persons')}</small><b>${L.length}</b></div>
@@ -325,7 +326,7 @@ function render(){
    <div class="stat"><small>${t('high')}</small><b>${L.length?fmt(Math.max(...L.map(e=>e.amt))):'–'}</b></div>
    <div class="stat"><small>${t('closeT')}</small><b>${fmt(cl)}</b></div>
    <div class="stat"><small>${t('giftsN')}</small><b>${L.filter(e=>e.gt).length}</b></div>`;
-  $('tabs').innerHTML=[['all','all'],['town','byTown'],['rel','byRel'],['cr','crT']].map(([k,l])=>`<button data-t="${k}" class="${tab===k?'on':''}">${t(l)}</button>`).join('');
+  setH($('tabs'),[['all','all'],['town','byTown'],['rel','byRel'],['cr','crT']].map(([k,l])=>`<button data-t="${k}" class="${tab===k?'on':''}">${t(l)}</button>`).join(''));
   const q=$('q').value.trim().toLowerCase();
   const F=L.filter(e=>!q||(e.name+' '+e.town).toLowerCase().includes(q));
   $('view').innerHTML=tab==='cr'?copyright():!F.length?`<div class="empty">${t('empty')}</div>`:tab==='town'?byTown(F):tab==='rel'?byRel(F):`<div class="tw">${table(F,true)}</div>`;
@@ -411,7 +412,7 @@ $('bizBtn').onclick=()=>{$('bdName').value=BIZ.name||'';$('bdGst').value=BIZ.gst
 $('bdLogof').onchange=async e=>{const v=e.target.files[0]&&await shrink(e.target.files[0],400);if(v){BIZ.logo=v;$('tBiz').innerHTML=`<span><img src="${v}"><button type="button" id="bdLogoX">✕</button></span>`}e.target.value=''};
 $('bd').addEventListener('click',ev=>{if(ev.target.id==='bdLogoX'){BIZ.logo='';$('tBiz').innerHTML=''}});
 $('bdNo').onclick=()=>$('bd').close();
-$('bdOk').onclick=()=>{BIZ.name=$('bdName').value.trim();BIZ.gst=$('bdGst').value.trim();BIZ.ph=$('bdPh').value.trim();BIZ.addr=$('bdAddr').value.trim();saveBiz();$('bd').close();toast('✔ '+t('saved'))};
+$('bdOk').onclick=()=>{BIZ.name=$('bdName').value.trim();BIZ.gst=$('bdGst').value.trim();BIZ.ph=$('bdPh').value.trim();BIZ.addr=$('bdAddr').value.trim();saveBiz();S.biz=Object.assign({},BIZ);S.bizM=ts();save();$('bd').close();toast('✔ '+t('saved'))};
 $('q').oninput=render;
 $('prn').onclick=report;
 $('csv').onclick=()=>{const L=cur(),f=S.funcs.find(x=>x.id===S.cur);
@@ -427,12 +428,13 @@ function merge(a,b){const del={...(a.del||{}),...(b.del||{})};
   const mm=(x,y)=>{const m=new Map();[...x,...y].forEach(e=>{const o=m.get(e.id);if(!o||(e.m||0)>(o.m||0)||((e.m||0)===(o.m||0)&&JSON.stringify(e)>JSON.stringify(o)))m.set(e.id,e)});return [...m.values()].filter(e=>!del[e.id])};
   return {...a,funcs:mm(a.funcs,b.funcs||[]),entries:mm(a.entries,b.entries||[]),del}}
 function adopt(r){if(!r||!Array.isArray(r.entries)||!Array.isArray(r.funcs))return false;
-  const bump=x=>{const v=+x;if(v>HLC&&v<4e12)HLC=v};r.entries.forEach(e=>bump(e&&e.m));r.funcs.forEach(f=>bump(f&&f.m));Object.keys(r.del||{}).forEach(k=>bump(r.del[k]));
-  const c=S.cur,l=S.lang,before=JSON.stringify([S.entries,S.funcs]);
+  const bump=x=>{const v=+x;if(v>HLC&&v<4e12)HLC=v};bump(r.bizM);r.entries.forEach(e=>bump(e&&e.m));r.funcs.forEach(f=>bump(f&&f.m));Object.keys(r.del||{}).forEach(k=>bump(r.del[k]));
+  const c=S.cur,l=S.lang,before=JSON.stringify([S.entries,S.funcs]);let bizCh=false;
   S=merge(S,r);S.cur=c;S.lang=l;
+  if(r.biz&&typeof r.biz==='object'&&(+r.bizM||0)>(+S.bizM||0)){S.biz=r.biz;S.bizM=+r.bizM;BIZ=Object.assign({logo:'',name:'',gst:'',addr:'',ph:''},r.biz);saveBiz();bizCh=true}
   if(!S.funcs.length)S.funcs=[{id:uid(),name:'',date:''}];
   if(!S.funcs.some(f=>f.id===S.cur))S.cur=S.funcs[0].id;
-  return before!==JSON.stringify([S.entries,S.funcs])}
+  return bizCh||before!==JSON.stringify([S.entries,S.funcs])}
 addEventListener('storage',e=>{if(e.key===K&&e.newValue){try{if(adopt(JSON.parse(e.newValue))){save();render()}}catch(x){}}});
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 
