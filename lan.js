@@ -9,7 +9,7 @@ const net=require('net'),dgram=require('dgram'),os=require('os'),crypto=require(
 const {EventEmitter}=require('events');
 
 const PROTO=1,MAXMSG=256*1024*1024,UDP_PORT=45874,HB_EVERY=4000,HB_DEAD=13000;
-const DEF={enabled:true,autoConnect:true,discover:true,port:45873,name:'',pin:'',use:{wifi:true,lan:true,netbird:true,other:true,virtual:false},ov:{},peers:[],known:{}};
+const DEF={enabled:true,autoConnect:true,discover:true,port:45873,name:'',pin:'',use:{wifi:true,lan:true,netbird:true,tailscale:true,other:true,virtual:false},ov:{},peers:[],known:{}};
 const now=()=>Date.now();
 const ip2n=ip=>ip.split('.').reduce((a,b)=>a*256+(+b),0);
 const isIPv4=s=>/^\d{1,3}(\.\d{1,3}){3}$/.test(s)&&s.split('.').every(n=>+n<=255);
@@ -17,7 +17,8 @@ const inRange=(ip,base,bits)=>{const m=bits===0?0:(0xFFFFFFFF<<(32-bits))>>>0;re
 const sha=s=>crypto.createHash('sha256').update(String(s)).digest('hex').slice(0,24);
 const classify=(name,addr)=>{
   if(/vethernet|vmware|virtualbox|vbox|hyper-v|docker|^veth|^br-|bluetooth|wsl|vmnet|loopback/i.test(name))return 'virtual';
-  if(/netbird|^wt\d|wireguard|^wg\d|tailscale|zerotier|^utun/i.test(name)||inRange(addr,'100.64.0.0',10))return 'netbird';
+  if(/tailscale/i.test(name))return 'tailscale';
+  if(/netbird|^wt\d|wireguard|^wg\d|zerotier|^utun/i.test(name)||inRange(addr,'100.64.0.0',10))return 'netbird';
   if(/wi-?fi|wlan|wireless|^wl|airport/i.test(name))return 'wifi';
   if(/ethernet|^eth|^en\d|^enp|^eno|^ens|local area|\blan\b/i.test(name))return 'lan';
   return 'other';
@@ -48,36 +49,39 @@ class Lan extends EventEmitter{
 
   setCfg(p){
     p=p||{};const c=this.cfg;let restart=false,drop=false,rescan=false;
-    ['enabled','autoConnect','discover'].forEach(k=>{if(typeof p[k]==='boolean'&&p[k]!==c[k]){c[k]=p[k];if(k==='enabled')restart=true;if(k==='discover')rescan=true}});
+    ['enabled','autoConnect','discover'].forEach(k=>{if(typeof p[k]==='boolean'&&p[k]!==c[k]){c[k]=p[k];if(k==='discover')rescan=true}});
     if(p.port!==undefined){const n=Math.round(+p.port);if(n>=1024&&n<=65535&&n!==c.port){c.port=n;restart=true}}
     if(typeof p.name==='string'&&p.name.trim()!==c.name){c.name=p.name.trim().slice(0,40);this._announceSoon()}
-    if(typeof p.pin==='string'&&p.pin.slice(0,64)!==c.pin){c.pin=p.pin.slice(0,64);drop=true}
+    if(typeof p.pin==='string'&&p.pin.slice(0,64)!==c.pin){c.pin=p.pin.slice(0,64);drop=true;this.targets.forEach(t=>{t.nextAt=0;t.tries=0;if(t.state==='rejected'){t.state='idle';t.err=''}})}   // new PIN -> retry at once
     if(p.use&&typeof p.use==='object'){Object.keys(DEF.use).forEach(k=>{if(typeof p.use[k]==='boolean')c.use[k]=p.use[k]});drop=true}
     if(p.ov&&typeof p.ov==='object'){c.ov=p.ov;drop=true}
     this._save();
-    if(restart){this.stop();if(c.enabled)this.start()}
+    if(restart){const was=this.running;this.stop();if(was)this.start()}
     else{if(drop)this._dropDisallowed(drop&&typeof p.pin==='string');if(rescan&&this.running){this._udpStop();if(c.discover)this._udpStart()}}
     this.log('info','Settings changed');this.touch();
   }
   /* ---------------- network interfaces ---------------- */
-  ifaces(){
-    if(this._ifc&&now()-this._ifcAt<2500)return this._ifc;
-    const out=[],all=os.networkInterfaces();
-    Object.keys(all).forEach(name=>(all[name]||[]).forEach(a=>{
-      if(!(a.family==='IPv4'||a.family===4))return;
-      if(a.internal&&!this.allowLoopback)return;
-      const cls=a.internal?'lan':classify(name,a.address),bits=ip2n(a.netmask).toString(2).split('1').length-1;
-      const ov=this.cfg.ov[name];
-      out.push({name,address:a.address,netmask:a.netmask,bits,cls,enabled:ov!==undefined?!!ov:this.cfg.use[cls]!==false});
-    }));
-    this._ifc=out;this._ifcAt=now();return out;
+  ifaces(){   // the adapter list is cached for 2.5 s, but "enabled" is always computed from the CURRENT settings
+    if(!this._raw||now()-this._rawAt>2500){
+      const out=[],all=os.networkInterfaces();
+      Object.keys(all).forEach(name=>(all[name]||[]).forEach(a=>{
+        if(!(a.family==='IPv4'||a.family===4))return;
+        if(a.internal&&!this.allowLoopback)return;
+        const cls=a.internal?'lan':classify(name,a.address),bits=ip2n(a.netmask).toString(2).split('1').length-1;
+        out.push({name,address:a.address,netmask:a.netmask,bits,cls,ll:/^169\.254\./.test(a.address)});
+      }));
+      this._raw=out;this._rawAt=now();
+    }
+    return this._raw.map(f=>{const ov=this.cfg.ov[f.name];return Object.assign({},f,{enabled:ov!==undefined?!!ov:(!f.ll&&this.cfg.use[f.cls]!==false)})});
   }
   /* which network does this remote address belong to */
   netOf(ip){
     if(!isIPv4(ip))return {cls:'other',iface:null,enabled:this.cfg.use.netbird!==false||this.cfg.use.other!==false};
     if(/^127\./.test(ip))return {cls:'lan',iface:'loopback',enabled:this.allowLoopback&&this.cfg.use.lan!==false&&this.cfg.ov.lo!==false};
-    for(const f of this.ifaces()){if(inRange(ip,f.address,f.bits))return {cls:f.cls,iface:f.name,enabled:f.enabled}}
-    const cls=inRange(ip,'100.64.0.0',10)?'netbird':'other';return {cls,iface:null,enabled:this.cfg.use[cls]!==false};
+    const hits=this.ifaces().filter(f=>!f.ll&&inRange(ip,f.address,f.bits));
+    if(hits.length){const f=hits.find(f=>f.enabled)||hits[0];return {cls:f.cls,iface:f.name,enabled:f.enabled}}   // WiFi + LAN cable on the same router: one enabled adapter is enough
+    if(inRange(ip,'100.64.0.0',10))return {cls:'netbird',iface:null,enabled:this.cfg.use.netbird!==false||this.cfg.use.tailscale!==false};   // NetBird / Tailscale address that no local adapter subnet covers
+    return {cls:'other',iface:null,enabled:this.cfg.use.other!==false};
   }
   allowedIp(ip){return this.netOf(ip).enabled}
   _dropDisallowed(all){this.links.forEach(c=>{if(all||!this.allowedIp(c.ip)){c.drop=true;this._kill(c,all?'Group PIN changed':'Network disabled')}})}
@@ -231,7 +235,10 @@ class Lan extends EventEmitter{
     switch(m.t){
       case 'state':if(typeof m.d==='string'){this.inbox.set(c.id,{id:c.id,from:c.name,data:m.d,at:now()});c.recv++;c.lastSync=now();this.emit('inbox');this.touch()}break;
       case 'req':c.dirty=false;this.sendState(c,true);break;
-      case 'ping':this._send(c,{t:'pong',ts:m.ts,now:now()});break;
+      case 'ping':this._send(c,{t:'pong',ts:m.ts,now:now()});
+        // anti-entropy: if our data fingerprints still differ after 8 s, exchange full snapshots again (heals any lost update)
+        if(m.dg&&this.digest){if(m.dg!==this.digest){const n=now();if(!c.diffSince)c.diffSince=n;else if(n-c.diffSince>8000&&n-(c.lastResync||0)>15000){c.lastResync=n;c.diffSince=n;this.log('warn','Data differs from '+c.name+' - syncing again');this.sendState(c,true);this._send(c,{t:'req'})}}else c.diffSince=0}
+        break;
       case 'pong':if(typeof m.ts==='number'){c.rtt=Math.max(0,now()-m.ts);if(typeof m.now==='number')c.clock=m.now-(now()-c.rtt/2);this.touch()}break;
       case 'bye':c.bye=m.r;c.drop=m.r==='pin'?false:c.drop;this._kill(c,'Closed by '+c.name);break;
     }
@@ -265,7 +272,7 @@ class Lan extends EventEmitter{
       if(!c.hello)return;
       if(!this.allowedIp(c.ip)){c.drop=true;this._kill(c,'Network disabled');return}
       if(n-c.lastRx>HB_DEAD){this._kill(c,'No answer (timeout)');return}
-      if(n-c.lastPing>=HB_EVERY){c.lastPing=n;this._send(c,{t:'ping',ts:n})}
+      if(n-c.lastPing>=HB_EVERY){c.lastPing=n;this._send(c,{t:'ping',ts:n,dg:this.digest||''})}
     });
     this.targets.forEach(t=>{
       if(t.paused||t.sock||this._linkAlive(t))return;
@@ -280,15 +287,28 @@ class Lan extends EventEmitter{
     this.touch();
   }
   /* ---------------- data ---------------- */
-  push(str){this.lastState=String(str||'');clearTimeout(this._pt);this._pt=setTimeout(()=>this.flush(),120)}
+  push(str,dg){this.lastState=String(str||'');this.digest=String(dg||'');clearTimeout(this._pt);this._pt=setTimeout(()=>this.flush(),120)}
   flush(){this.links.forEach(c=>{if(c.hello)this.sendState(c)})}
   sendState(c,force){
     if(!this.lastState||c.dead||c.sock.destroyed)return;
     if(c.sending){c.dirty=true;return}
     if(!force&&c.lastOut===this.lastState)return;
     c.sending=true;const data=this.lastState;
-    if(!this._fc||this._fc.data!==data)this._fc={data,buf:this._frame({t:'state',d:data})};
-    try{c.sock.write(this._fc.buf,()=>{c.sending=false;c.sent++;c.lastOut=data;c.lastOutAt=now();this.touch();if(c.dirty){c.dirty=false;this.sendState(c)}})}catch(e){c.sending=false}
+    this._frameFor(data).then(buf=>{
+      if(c.dead||c.sock.destroyed){c.sending=false;return}
+      try{c.sock.write(buf,()=>{c.sending=false;c.sent++;c.lastOut=data;c.lastOutAt=now();this.touch();if(c.dirty){c.dirty=false;this.sendState(c)}})}catch(e){c.sending=false}
+    }).catch(()=>{c.sending=false});
+  }
+  _frameFor(data){   // build (and gzip in the background, so the app never freezes) the frame once for all devices
+    if(this._fc&&this._fc.data===data)return Promise.resolve(this._fc.buf);
+    if(this._fcp&&this._fcp.data===data)return this._fcp.p;
+    const p=new Promise((res,rej)=>{
+      const raw=Buffer.from(JSON.stringify({t:'state',d:data}),'utf8');
+      const done=(body,fl)=>{const h=Buffer.alloc(5);h.writeUInt32BE(body.length,0);h[4]=fl;const buf=Buffer.concat([h,body]);this._fc={data,buf};res(buf)};
+      if(raw.length<65536)return done(raw,0);
+      zlib.gzip(raw,{level:3},(e,z)=>e?done(raw,0):done(z,1));
+    });
+    this._fcp={data,p};return p;
   }
   take(){const a=[...this.inbox.values()];this.inbox.clear();return a}
   syncNow(){this.links.forEach(c=>{if(c.hello){this.sendState(c,true);this._send(c,{t:'req'})}});return {ok:true}}
@@ -309,7 +329,7 @@ class Lan extends EventEmitter{
     const msg=Buffer.from(JSON.stringify({moi:1,id:this.id,name:this.name,port:this.cfg.port,grp:this.grp()}));
     const sent=new Set();
     this.ifaces().forEach(f=>{
-      if(!f.enabled||f.cls==='netbird')return;
+      if(!f.enabled||f.ll||f.cls==='netbird'||f.cls==='tailscale')return;
       const bc=f.bits>=31?null:((ip2n(f.address)|(~ip2n(f.netmask)>>>0))>>>0);if(bc===null)return;
       const addr=[bc>>>24,(bc>>>16)&255,(bc>>>8)&255,bc&255].join('.');if(sent.has(addr))return;sent.add(addr);
       try{this.udp.send(msg,this.udpPort,addr,()=>{})}catch(e){}
@@ -331,7 +351,7 @@ class Lan extends EventEmitter{
     if(this.scanInfo&&this.scanInfo.running)return {ok:true};
     const hosts=[];
     this.ifaces().forEach(f=>{
-      if(!f.enabled||f.cls==='netbird'||f.bits<22||f.bits>30||/^127\./.test(f.address))return;
+      if(!f.enabled||f.ll||f.cls==='netbird'||f.cls==='tailscale'||f.bits<22||f.bits>30||/^127\./.test(f.address))return;
       const base=(ip2n(f.address)&(ip2n(f.netmask)))>>>0,size=Math.pow(2,32-f.bits);
       for(let i=1;i<size-1;i++){const n=(base+i)>>>0,ip=[n>>>24,(n>>>16)&255,(n>>>8)&255,n&255].join('.');if(ip!==f.address)hosts.push({ip,f:f.address})}
     });
@@ -367,10 +387,13 @@ class Lan extends EventEmitter{
     this.targets.forEach(t=>{const l=t.devId?this.links.get(t.devId):null;if(l)seen.add(l.id);peers.push(mk(t,l))});
     this.links.forEach(l=>{if(!l.hello||seen.has(l.id))return;
       const net=this.netOf(l.ip);peers.push({key:'in:'+l.id,id:l.id,name:l.name,ip:l.ip,port:l.peerPort,src:'incoming',auto:false,state:'connected',err:'',via:net.cls,iface:net.iface||'',rtt:l.rtt,sent:l.sent,recv:l.recv,lastSync:l.lastSync,lastOut:l.lastOutAt||0,clock:Math.round(l.clock),since:l.born,initiator:false,paused:false,nextIn:0,tries:0,seen:n})});
+    const byId=new Map();
+    peers.forEach(p=>{if(p.id&&p.state==='connected'){const q=byId.get(p.id);if(!q||(q.src!=='manual'&&p.src==='manual'))byId.set(p.id,p)}});
+    const list=peers.filter(p=>!(p.id&&p.state==='connected')||byId.get(p.id)===p);
     const c=this.cfg;
     return {running:this.running,listening:this.listening,serverErr:this.serverErr,id:this.id,name:this.name,host:this.hostname,port:c.port,time:n,
       cfg:{enabled:c.enabled,autoConnect:c.autoConnect,discover:c.discover,port:c.port,name:c.name,pin:c.pin,use:c.use,ov:c.ov},
-      udp:!!this.udp,ifaces:this.ifaces(),peers,connected:peers.filter(p=>p.state==='connected').length,scan:this.scanInfo,logs:this.logs.slice(-60)};
+      udp:!!this.udp,ifaces:this.ifaces(),peers:list,connected:list.filter(p=>p.state==='connected').length,scan:this.scanInfo,logs:this.logs.slice(-60)};
   }
 }
 module.exports=Lan;
