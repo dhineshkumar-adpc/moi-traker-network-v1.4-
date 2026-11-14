@@ -18,12 +18,14 @@ SAME NETWORK (WiFi / LAN)
   illa-na matha computer-oda IP-ai "Add a device manually"-la podunga.
 - Matha computer-oda IP therinjukka: avanga computer-la Network sync tab -> "This computer"/"Networks to use" -> address paarunga.
 
-NETBIRD (veliya irundhu / vera vera ooru)
+NETBIRD / TAILSCALE (veliya irundhu / vera vera ooru) - rendume support
 1. Ella computer-lum NetBird install panni, ORE NetBird network-la join pannunga.
 2. NetBird dashboard-la ovvoru computer-oda IP (100.x.x.x) paarunga.
 3. Moi Tracker -> Network sync -> "Add a device manually" -> adhey 100.x.x.x IP -> "Add & connect".
    (NetBird-la broadcast illa, athanala IP kandippaa podanum. Oru thadava add pannina, adutha murai thaanaaga connect aagum.)
-4. Network sync-la "NetBird" button amukkina, NetBird adapter mattum use aagum.
+4. Network sync-la "NetBird" illa "Tailscale" button amukkina, andha adapter mattum use aagum.
+   Tailscale-um same: ella computer-lum Tailscale install, ore account-la login, 100.x.x.x IP-ai manual-aa add pannunga.
+   (Adapter-la "no IP yet / 169.254..." nu irundha, adhu connect aagala - Tailscale/NetBird app-ai open panni login pannunga.)
 
 NETWORK SWITCH (WiFi / LAN / NetBird)
 "Networks to use" -> [All] [WiFi] [LAN cable] [NetBird]. Ovvoru adapter-kum thaniya tick / untick pannalam.
