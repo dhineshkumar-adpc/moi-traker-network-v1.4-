@@ -8,14 +8,14 @@ const NT={
   thisDev:'This computer',devName:'Device name',port:'Port',pin:'Group PIN (same on all computers)',pinHint:'Only computers with the same PIN connect to each other. Empty = open to everyone on the network.',noPin:'No PIN set: any Moi Tracker on this network can connect.',
   listening:'Ready to accept connections',notListening:'Not accepting connections',yourIps:'Your addresses',
   autoStart:'Start automatically when the software opens',autoConnect:'Auto-connect to devices found on the network',discover:'Find devices automatically (broadcast)',
-  nets:'Networks to use',mAll:'All',wifi:'WiFi',lan:'LAN cable',netbird:'NetBird',other:'Other',virtual:'Virtual',adapter:'Adapter',
+  nets:'Networks to use',mAll:'All',wifi:'WiFi',lan:'LAN cable',netbird:'NetBird',tailscale:'Tailscale',other:'Other',noip:'no IP yet',virtual:'Virtual',adapter:'Adapter',
   devices:'Connected devices',cName:'Device',cAddr:'Address',cNet:'Network',cStat:'Status',cPing:'Ping',cSync:'Last data',cData:'↑ sent / ↓ received',cAct:'Control',
   connected:'Connected',connecting:'Connecting…',failed:'Offline',rejected:'Rejected',paused:'Paused',idle:'Waiting',
   bConn:'Connect',bDisc:'Disconnect',bDel:'Remove',autoRe:'Auto',src_manual:'Manual',src_auto:'Auto',src_incoming:'Incoming',
   noDev:'No other device yet. Open the software on another computer in the same network (it appears here by itself), or add its IP address below.',
   add:'Add a device manually',ipPh:'IP address or name  (e.g. 192.168.1.20  or  100.64.1.5)',namePh:'Name (optional)',addBtn:'Add & connect',
   log:'Activity log',retry:s=>`retry in ${s}s`,clock:s=>`clock differs ${s}s`,clockWarn:'The clocks of the computers differ. Set the same time on all of them.',
-  netbirdHelp:'NetBird: install NetBird on every computer, join the same NetBird network, then add the other computer\'s NetBird address (100.x.x.x) or name above.',
+  netbirdHelp:'NetBird / Tailscale: install it on every computer, join the same network, then add the other computer\'s 100.x.x.x address (or its name) in "Add a device manually".',
   portUse:'Port is used by another program. Change the port.',fwHint:'Cannot reach the other computer? Press "Open Windows Firewall" on both computers, then tick Moi Tracker for Private and Public networks.',
   ago:s=>s<3?'just now':s<60?`${s}s ago`:s<3600?`${Math.floor(s/60)}m ago`:`${Math.floor(s/3600)}h ago`,never:'–',
   chipOn:n=>`🟢 ${n} connected`,chipWait:'🟡 searching…',chipOff:'⚪ sync off',updated:n=>`🔄 Updated from ${n}`,added:'Device added',fwOk:'Firewall screen opened',fwNo:'Could not open',confirmDel:'Remove this device?'},
@@ -25,19 +25,19 @@ const NT={
   thisDev:'இந்தக் கணினி',devName:'கருவியின் பெயர்',port:'போர்ட்',pin:'குழு PIN (எல்லா கணினிகளிலும் ஒரே மாதிரி)',pinHint:'ஒரே PIN உள்ள கணினிகள் மட்டுமே இணையும். காலியாக விட்டால் நெட்வொர்க்கில் உள்ள அனைவரும் இணையலாம்.',noPin:'PIN இல்லை: இந்த நெட்வொர்க்கில் உள்ள எந்த Moi Tracker-ம் இணையலாம்.',
   listening:'இணைப்புகளை ஏற்கத் தயார்',notListening:'இணைப்புகளை ஏற்கவில்லை',yourIps:'உங்கள் முகவரிகள்',
   autoStart:'மென்பொருள் திறந்ததும் தானாகத் தொடங்கு',autoConnect:'நெட்வொர்க்கில் கண்ட கருவிகளுடன் தானாக இணை',discover:'கருவிகளைத் தானாகத் தேடு (broadcast)',
-  nets:'பயன்படுத்தும் நெட்வொர்க்',mAll:'அனைத்தும்',wifi:'WiFi',lan:'LAN கேபிள்',netbird:'NetBird',other:'மற்றவை',virtual:'மெய்நிகர்',adapter:'அடாப்டர்',
+  nets:'பயன்படுத்தும் நெட்வொர்க்',mAll:'அனைத்தும்',wifi:'WiFi',lan:'LAN கேபிள்',netbird:'NetBird',tailscale:'Tailscale',other:'மற்றவை',noip:'IP இல்லை',virtual:'மெய்நிகர்',adapter:'அடாப்டர்',
   devices:'இணைந்த கருவிகள்',cName:'கருவி',cAddr:'முகவரி',cNet:'நெட்வொர்க்',cStat:'நிலை',cPing:'பிங்',cSync:'கடைசித் தரவு',cData:'↑ அனுப்பியது / ↓ பெற்றது',cAct:'கட்டுப்பாடு',
   connected:'இணைந்தது',connecting:'இணைக்கிறது…',failed:'தொடர்பில்லை',rejected:'நிராகரிக்கப்பட்டது',paused:'நிறுத்தப்பட்டது',idle:'காத்திருக்கிறது',
   bConn:'இணை',bDisc:'துண்டி',bDel:'நீக்கு',autoRe:'தானியங்கி',src_manual:'கைமுறை',src_auto:'தானியங்கி',src_incoming:'உள்வரும்',
   noDev:'வேறு கருவி இல்லை. அதே நெட்வொர்க்கில் உள்ள மற்றொரு கணினியில் மென்பொருளைத் திறங்கள் (இங்கே தானாகத் தெரியும்), அல்லது கீழே அதன் IP முகவரியைச் சேர்க்கவும்.',
   add:'கருவியைக் கைமுறையாகச் சேர்',ipPh:'IP முகவரி அல்லது பெயர்  (எ.கா. 192.168.1.20  அல்லது  100.64.1.5)',namePh:'பெயர் (விருப்பம்)',addBtn:'சேர்த்து இணை',
   log:'செயல்பாட்டுப் பதிவு',retry:s=>`${s} விநாடியில் மீண்டும்`,clock:s=>`கடிகாரம் ${s}வி வேறுபடுகிறது`,clockWarn:'கணினிகளின் கடிகாரங்கள் வேறுபடுகின்றன. எல்லாவற்றிலும் ஒரே நேரத்தை அமைக்கவும்.',
-  netbirdHelp:'NetBird: எல்லா கணினிகளிலும் NetBird நிறுவி, ஒரே NetBird நெட்வொர்க்கில் சேர்த்து, மற்ற கணினியின் NetBird முகவரியை (100.x.x.x) அல்லது பெயரை மேலே சேர்க்கவும்.',
+  netbirdHelp:'NetBird / Tailscale: எல்லா கணினிகளிலும் நிறுவி, ஒரே நெட்வொர்க்கில் சேர்த்து, மற்ற கணினியின் 100.x.x.x முகவரியை (அல்லது பெயரை) "கருவியைக் கைமுறையாகச் சேர்" இல் சேர்க்கவும்.',
   portUse:'இந்த போர்ட்டை வேறு நிரல் பயன்படுத்துகிறது. போர்ட்டை மாற்றவும்.',fwHint:'மற்ற கணினியை அடைய முடியவில்லையா? இரண்டு கணினிகளிலும் "Windows Firewall திற" அழுத்தி, Moi Tracker-க்கு Private மற்றும் Public இரண்டையும் டிக் செய்யவும்.',
   ago:s=>s<3?'இப்போது':s<60?`${s}வி முன்`:s<3600?`${Math.floor(s/60)}நி முன்`:`${Math.floor(s/3600)}ம முன்`,never:'–',
   chipOn:n=>`🟢 ${n} இணைந்தது`,chipWait:'🟡 தேடுகிறது…',chipOff:'⚪ ஒத்திசைவு நிறுத்தம்',updated:n=>`🔄 ${n} இலிருந்து புதுப்பிக்கப்பட்டது`,added:'கருவி சேர்க்கப்பட்டது',fwOk:'Firewall திரை திறக்கப்பட்டது',fwNo:'திறக்க முடியவில்லை',confirmDel:'இந்தக் கருவியை நீக்கவா?'}};
 const nt=(k,...a)=>{const v=(NT[lang]||NT.en)[k];return typeof v==='function'?v(...a):(v===undefined?k:v)};
-const VIA={wifi:'WiFi',lan:'LAN',netbird:'NetBird',other:'Other',virtual:'Virtual'};
+const VIA={wifi:'WiFi',lan:'LAN',netbird:'NetBird',tailscale:'Tailscale',other:'Other',virtual:'Virtual'};
 let ST=null,built=false,builtLang=null,shown=false;
 
 /* ---------- style ---------- */
@@ -53,7 +53,7 @@ const css=document.createElement('style');css.textContent=`
 .nchk{display:flex;gap:8px;align-items:flex-start;margin:7px 0;color:#dbe7ff;font-size:.92rem;cursor:pointer}.nchk input{width:auto;margin-top:3px}
 .nmodes{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.nmodes button{border:1px solid #3d72c8;background:rgba(18,58,128,.6);color:#eaf1ff;border-radius:999px;padding:5px 14px;cursor:pointer;font:inherit;font-size:.88rem}.nmodes button.on{background:linear-gradient(#f6dc8a,#d3a238);color:#10224a;font-weight:700;border-color:#f1d27f}
 .nif{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1d4585;font-size:.9rem}.nif:last-child{border:0}.nif .a{flex:1;min-width:0}.nif .a span{color:var(--muted);font-size:.82rem;display:block}.nif input{width:auto}
-.nv{display:inline-block;border-radius:999px;padding:0 9px;font-size:.78rem;font-weight:600;color:#10224a;background:#9db4da}.nv.wifi{background:#6cc1ff}.nv.lan{background:#8be28b}.nv.netbird{background:#f1c04a}.nv.virtual{background:#6b7fa8;color:#fff}
+.nv{display:inline-block;border-radius:999px;padding:0 9px;font-size:.78rem;font-weight:600;color:#10224a;background:#9db4da}.nv.wifi{background:#6cc1ff}.nv.lan{background:#8be28b}.nv.netbird{background:#f1c04a}.nv.tailscale{background:#a9b4ff}.nv.virtual{background:#6b7fa8;color:#fff}
 .nst{display:inline-block;border-radius:999px;padding:1px 10px;font-size:.8rem;font-weight:700}.nst.connected{background:#1f9d62;color:#fff}.nst.connecting{background:#d6a021;color:#10224a}.nst.failed,.nst.rejected{background:#c83a5a;color:#fff}.nst.paused,.nst.idle{background:#53648a;color:#fff}
 .ntab td,.ntab th{white-space:nowrap}.ntab td.w{white-space:normal;max-width:240px}.ntab small{color:var(--muted);display:block}
 .nbad{background:rgba(200,58,90,.18);border:1px solid #c83a5a;border-radius:10px;padding:8px 12px;margin:8px 0;font-size:.9rem}.nwarn{background:rgba(217,169,60,.16);border:1px solid #d9a93c;border-radius:10px;padding:8px 12px;margin:8px 0;font-size:.9rem}
@@ -63,7 +63,9 @@ const css=document.createElement('style');css.textContent=`
 
 /* ---------- data bridge: push every change, pull incoming ONE BY ONE ---------- */
 let npt=null,npulling=false;
-window.netPush=function(){if(!LAN)return;clearTimeout(npt);npt=setTimeout(()=>{try{LAN.push(JSON.stringify(S))}catch(e){}},150)};
+const h53=(s,seed)=>{let h1=0xdeadbeef^(seed||0),h2=0x41c6ce57^(seed||0);for(let i=0,c;i<s.length;i++){c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return (4294967296*(2097151&h2)+(h1>>>0)).toString(36)};
+function fingerprint(){const a=[];S.entries.forEach(e=>a.push('e'+e.id+':'+(e.m||0)));S.funcs.forEach(f=>a.push('f'+f.id+':'+(f.m||0)));Object.keys(S.del||{}).forEach(k=>a.push('d'+k));a.push('b'+(S.bizM||0));a.sort();return h53(a.join('|'))}
+window.netPush=function(){if(!LAN)return;clearTimeout(npt);npt=setTimeout(()=>{try{LAN.push(JSON.stringify(S),fingerprint())}catch(e){}},150)};
 async function netPull(){
   if(npulling)return;npulling=true;let from='';
   try{for(;;){const items=await LAN.take();if(!items||!items.length)break;
@@ -101,8 +103,8 @@ function build(){
 }
 const setVal=(id,v)=>{const el=$(id);if(el&&document.activeElement!==el&&el.value!==String(v))el.value=v};
 const setChk=(id,v)=>{const el=$(id);if(el&&document.activeElement!==el)el.checked=!!v};
-function modeOf(c){const u=c.use,on=k=>u[k]!==false;if(Object.keys(c.ov||{}).length)return '';
-  if(on('wifi')&&on('lan')&&on('netbird')&&on('other'))return 'all';if(on('wifi')&&!on('lan')&&!on('netbird')&&!on('other'))return 'wifi';if(!on('wifi')&&on('lan')&&!on('netbird')&&!on('other'))return 'lan';if(!on('wifi')&&!on('lan')&&on('netbird')&&!on('other'))return 'netbird';return ''}
+const MK=['wifi','lan','netbird','tailscale','other'];
+function modeOf(c){if(Object.keys(c.ov||{}).length)return '';const on=MK.filter(k=>c.use[k]!==false);return on.length===MK.length?'all':on.length===1?on[0]:''}
 const time=ms=>new Date(ms).toLocaleTimeString();
 const agoOf=ms=>ms?nt('ago',Math.max(0,Math.round((Date.now()-ms)/1000))):nt('never');
 
@@ -121,21 +123,32 @@ function update(){
   const skew=st.peers.filter(p=>p.state==='connected'&&p.clock!==null&&Math.abs(p.clock)>2000);
   if(skew.length)al+=`<div class="nwarn">⏱ ${esc(nt('clockWarn'))} (${skew.map(p=>esc(p.name)+' '+Math.round(p.clock/1000)+'s').join(', ')})</div>`;
   if(st.running&&st.peers.some(p=>p.state==='failed'&&/refused|timeout|No answer/i.test(p.err||'')))al+=`<div class="nwarn">🛡 ${esc(nt('fwHint'))}</div>`;
-  $('nalerts').innerHTML=al;
+  setH($('nalerts'),al);
   setVal('cName',c.name||st.host||'');setVal('cPort',c.port);setVal('cPin',c.pin||'');setChk('cEn',c.enabled);setChk('cAuto',c.autoConnect);setChk('cDisc',c.discover);
   const m=modeOf(c);
-  $('nmodes').innerHTML=[['all','mAll'],['wifi','wifi'],['lan','lan'],['netbird','netbird']].map(([k,l])=>`<button type="button" data-a="mode" data-v="${k}" class="${m===k?'on':''}">${esc(nt(l))}</button>`).join('');
-  $('nifs').innerHTML=st.ifaces.length?st.ifaces.map(f=>`<label class="nif"><input type="checkbox" data-a="ifc" data-n="${esc(f.name)}" ${f.enabled?'checked':''}><div class="a">${esc(f.name)}<span>${esc(f.address)}/${f.bits}</span></div><span class="nv ${f.cls}">${esc(VIA[f.cls]||f.cls)}</span></label>`).join(''):`<div class="legend">–</div>`;
+  setH($('nmodes'),[['all','mAll'],['wifi','wifi'],['lan','lan'],['netbird','netbird'],['tailscale','tailscale']].map(([k,l])=>`<button type="button" data-a="mode" data-v="${k}" class="${m===k?'on':''}">${esc(nt(l))}</button>`).join(''));
+  setH($('nifs'),st.ifaces.length?st.ifaces.map(f=>`<label class="nif" style="${f.ll?'opacity:.55':''}"><input type="checkbox" data-a="ifc" data-n="${esc(f.name)}" ${f.enabled?'checked':''}><div class="a">${esc(f.name)}<span>${f.ll?esc(nt('noip'))+' ('+esc(f.address)+')':esc(f.address)+'/'+f.bits}</span></div><span class="nv ${f.cls}">${esc(VIA[f.cls]||f.cls)}</span></label>`).join(''):`<div class="legend">–</div>`);
   const order={connected:0,connecting:1,failed:2,rejected:3,idle:4,paused:5};
   const ps=st.peers.slice().sort((a,b)=>(order[a.state]-order[b.state])||String(a.name).localeCompare(b.name));
-  $('npeers').innerHTML=ps.map(p=>{
-    const live=p.state==='connected',sub=live?(p.clock!==null&&Math.abs(p.clock)>2000?'⏱ '+nt('clock',Math.round(p.clock/1000)):''):(p.state==='failed'||p.state==='rejected')?(p.err||'')+(p.nextIn?' · '+nt('retry',p.nextIn):''):'';
-    const act=(p.src==='incoming')?'':`${live||p.state==='connecting'?`<button class="btn alt sm" data-a="disc" data-k="${esc(p.key)}">${esc(nt('bDisc'))}</button>`:`<button class="btn sm" data-a="conn" data-k="${esc(p.key)}">${esc(nt('bConn'))}</button>`}
-      <label class="nchk" style="display:inline-flex;margin:0 0 0 6px" title="${esc(nt('autoRe'))}"><input type="checkbox" data-a="pauto" data-k="${esc(p.key)}" ${p.auto?'checked':''}><span>${esc(nt('autoRe'))}</span></label>
-      ${p.src==='manual'?`<button class="btn alt sm" data-a="del" data-k="${esc(p.key)}">✕</button>`:''}`;
-    return `<tr><td class="w"><b>${esc(p.name)}</b><small>${esc(nt('src_'+p.src))}${p.id?' · '+esc(p.id.slice(0,6)):''}</small></td><td>${esc(p.ip)}:${p.port||''}</td><td><span class="nv ${p.via}">${esc(VIA[p.via]||p.via)}</span>${p.iface?`<small>${esc(p.iface)}</small>`:''}</td><td class="w"><span class="nst ${p.state}">${esc(nt(p.state))}</span>${sub?`<small>${esc(sub)}</small>`:''}</td><td class="a">${live&&p.rtt!==null?p.rtt+' ms':'–'}</td><td>${live?esc(agoOf(p.lastSync)):'–'}</td><td>${live?`↑ ${p.sent} / ↓ ${p.recv}`:'–'}</td><td>${act}</td></tr>`}).join('');
+  const tb=$('npeers'),old=new Map([...tb.children].map(r=>[r.dataset.k,r]));
+  ps.forEach((p,i)=>{
+    const live=p.state==='connected',sig=[p.key,p.name,p.src,p.id,p.ip,p.port,p.via,p.iface,p.state,p.auto,p.paused].join('|');
+    let r=old.get(p.key);
+    if(!r||r.dataset.sig!==sig){
+      const act=(p.src==='incoming')?'':`${live||p.state==='connecting'?`<button class="btn alt sm" data-a="disc" data-k="${esc(p.key)}">${esc(nt('bDisc'))}</button>`:`<button class="btn sm" data-a="conn" data-k="${esc(p.key)}">${esc(nt('bConn'))}</button>`}
+        <label class="nchk" style="display:inline-flex;margin:0 0 0 6px" title="${esc(nt('autoRe'))}"><input type="checkbox" data-a="pauto" data-k="${esc(p.key)}" ${p.auto?'checked':''}><span>${esc(nt('autoRe'))}</span></label>
+        ${p.src==='manual'?`<button class="btn alt sm" data-a="del" data-k="${esc(p.key)}">✕</button>`:''}`;
+      const n=document.createElement('tr');n.dataset.k=p.key;n.dataset.sig=sig;
+      n.innerHTML=`<td class="w"><b>${esc(p.name)}</b><small>${esc(nt('src_'+p.src))}${p.id?' · '+esc(p.id.slice(0,6)):''}</small></td><td>${esc(p.ip)}:${p.port||''}</td><td><span class="nv ${p.via}">${esc(VIA[p.via]||p.via)}</span>${p.iface?`<small>${esc(p.iface)}</small>`:''}</td><td class="w"><span class="nst ${p.state}">${esc(nt(p.state))}</span><small data-f="sub"></small></td><td class="a" data-f="rtt"></td><td data-f="ago"></td><td data-f="data"></td><td>${act}</td>`;
+      if(r)tb.replaceChild(n,r);else tb.appendChild(n);r=n}
+    old.delete(p.key);if(tb.children[i]!==r)tb.insertBefore(r,tb.children[i]||null);
+    const sub=live?(p.clock!==null&&Math.abs(p.clock)>2000?'⏱ '+nt('clock',Math.round(p.clock/1000)):''):(p.state==='failed'||p.state==='rejected')?(p.err||'')+(p.nextIn?' · '+nt('retry',p.nextIn):''):'';
+    const set=(f,v)=>{const el=r.querySelector('[data-f='+f+']');if(el&&el.textContent!==v)el.textContent=v};
+    set('sub',sub);set('rtt',live&&p.rtt!==null?p.rtt+' ms':'–');set('ago',live?agoOf(p.lastSync):'–');set('data',live?`↑ ${p.sent} / ↓ ${p.recv}`:'–');
+  });
+  old.forEach(r=>r.remove());
   const ne=$('nempty');ne.hidden=ps.length>0;ne.textContent=nt('noDev');
-  $('nlog').innerHTML=st.logs.slice().reverse().map(l=>`<div class="${l.l}">${esc(time(l.t))} · ${esc(l.m)}</div>`).join('');
+  setH($('nlog'),st.logs.slice().reverse().map(l=>`<div class="${l.l}">${esc(time(l.t))} · ${esc(l.m)}</div>`).join(''));
 }
 function chip(){const el=$('netchip');if(!el)return;if(!LAN){el.hidden=true;return}el.hidden=false;const st=ST;
   el.textContent=!st?nt('chipWait'):!st.running?nt('chipOff'):st.connected?nt('chipOn',st.connected):nt('chipWait');
@@ -146,16 +159,16 @@ async function act(fn){try{const r=await fn();return r}catch(e){return null}}
 document.addEventListener('click',async ev=>{
   const chipEl=ev.target.closest('#netchip');if(chipEl){const b=document.querySelector('#nav [data-n=net]');if(b)b.click();return}
   const b=ev.target.closest('#netv [data-a]');if(!b||!LAN||b.tagName==='INPUT')return;const a=b.dataset.a,k=b.dataset.k;
-  if(a==='toggle')await act(()=>LAN.cfg({enabled:!ST.running}));
+  if(a==='toggle')await act(()=>ST.running?LAN.stop():LAN.start());
   else if(a==='connAll')await act(()=>LAN.connectAll());
   else if(a==='discAll')await act(()=>LAN.disconnectAll());
-  else if(a==='syncNow'){await act(()=>LAN.push(JSON.stringify(S)));await act(()=>LAN.syncNow())}
+  else if(a==='syncNow'){await act(()=>LAN.push(JSON.stringify(S),fingerprint()));await act(()=>LAN.syncNow())}
   else if(a==='scan')await act(()=>LAN.scan());
   else if(a==='fw'){const r=await act(()=>LAN.firewall());toast(r&&r.ok?nt('fwOk'):nt('fwNo'))}
   else if(a==='conn')await act(()=>LAN.connect(k));
   else if(a==='disc')await act(()=>LAN.disconnect(k));
   else if(a==='del'){if(await ask(nt('confirmDel')))await act(()=>LAN.remove(k))}
-  else if(a==='mode'){const v=b.dataset.v,u={wifi:false,lan:false,netbird:false,other:false};if(v==='all')Object.keys(u).forEach(x=>u[x]=true);else u[v]=true;await act(()=>LAN.cfg({use:u,ov:{}}))}
+  else if(a==='mode'){const v=b.dataset.v,u={};MK.forEach(x=>u[x]=(v==='all'||x===v));await act(()=>LAN.cfg({use:u,ov:{}}))}
   else if(a==='add'){const ip=$('aIp').value.trim();if(!ip)return;const r=await act(()=>LAN.add({ip,port:+$('aPort').value||undefined,name:$('aName').value.trim()}));
     if(r&&r.ok){$('aIp').value='';$('aName').value='';$('aPort').value='';toast('✔ '+nt('added'))}else toast('⚠ '+(r&&r.err||'error'))}
   refresh();
@@ -172,8 +185,9 @@ async function refresh(){try{ST=await LAN.status();update()}catch(e){}}
 
 /* ---------- start ---------- */
 if(!LAN){const b=document.querySelector('#nav [data-n=net]');if(b)b.hidden=true;chip();return}
-const _render=render;render=function(){_render();if(shown){built=false;build()}update()};
+const _render=render;render=function(){_render();if(shown)build();update()};
 LAN.onStatus(s=>{ST=s;update()});LAN.onInbox(()=>netPull());
 setInterval(()=>{if(shown&&ST)update()},1000);
+if(!S.bizM&&(BIZ.name||BIZ.logo||BIZ.addr||BIZ.ph||BIZ.gst)){S.biz=Object.assign({},BIZ);S.bizM=1;save()}
 refresh();netPush();netPull();
 })();
