@@ -1,0 +1,65 @@
+MOI TRACKER 1.4.0 - NETWORK SYNC GUIDE  (Tamil + English)
+=========================================================
+
+ITHU ENNA?
+Oru shop-la 2 / 3 / athigam computer-la Moi Tracker install pannunga. Ella computer-um ORE software mari
+live-aa work aagum. Oru computer-la moi entry add / edit / delete pannina, matha computer-la udane theriyum.
+Internet thevai illa - WiFi, LAN cable (router/switch) irundha podhum. Veliye irundhu connect panna NetBird use pannalam.
+
+MUDHAL MURAI SETUP (ovvoru computer-lum)
+1. Software open pannunga -> left menu -> "Network sync" (நெட்வொர்க் ஒத்திசைவு).
+2. "Group PIN" -> ella computer-lum ORE PIN type pannunga (example 4821). PIN illa-na yaar venumna connect aagalaam.
+3. Avlo thaan. Software open pannadhum thaanaaga matha computers-ai kandupidichu connect aagum.
+   (Windows first time "Allow access" kekkum -> "Private" and "Public" rendum tick panni Allow pannunga.)
+
+SAME NETWORK (WiFi / LAN)
+- Auto: "Find devices automatically" + "Auto-connect" ON (default). Ethuvum pannanum-nu illa.
+- Router "AP isolation / client isolation" ON-na broadcast block aagum -> "Scan network" button use pannunga,
+  illa-na matha computer-oda IP-ai "Add a device manually"-la podunga.
+- Matha computer-oda IP therinjukka: avanga computer-la Network sync tab -> "This computer"/"Networks to use" -> address paarunga.
+
+NETBIRD (veliya irundhu / vera vera ooru)
+1. Ella computer-lum NetBird install panni, ORE NetBird network-la join pannunga.
+2. NetBird dashboard-la ovvoru computer-oda IP (100.x.x.x) paarunga.
+3. Moi Tracker -> Network sync -> "Add a device manually" -> adhey 100.x.x.x IP -> "Add & connect".
+   (NetBird-la broadcast illa, athanala IP kandippaa podanum. Oru thadava add pannina, adutha murai thaanaaga connect aagum.)
+4. Network sync-la "NetBird" button amukkina, NetBird adapter mattum use aagum.
+
+NETWORK SWITCH (WiFi / LAN / NetBird)
+"Networks to use" -> [All] [WiFi] [LAN cable] [NetBird]. Ovvoru adapter-kum thaniya tick / untick pannalam.
+
+CONTROLS
+- Start / Stop : live sync on / off.   - Connect all / Disconnect all.   - Sync now : ippo full sync.
+- Ovvoru device-kum: Connect / Disconnect, "Auto" (thaanaaga thirumba connect), Remove.
+- Status: Connected / Connecting / Offline / Rejected (PIN thappu) / Paused. IP, network (WiFi/LAN/NetBird), ping ms,
+  last data time, sent/received count ellaam table-la theriyum. "Activity log"-la ena nadandhadhu paakkalaam.
+- Mela header-la "🟢 2 connected" chip eppavum theriyum.
+
+EPPADI VELAI SEIYUDHU (100% safe-aa irukka)
+- Ovvoru entry-kum thani ID + time stamp. 3 computer-la ore nerathula entry add pannina ellam serum (onnum maraiyaadhu).
+- Oru entry-ai rendu computer-la ore nerathula edit pannina, LATEST edit jeyikkum. Delete eppavum jeyikkum.
+- Connection poga vitta (WiFi cut, cable pull) 13 second-la theriyum; thirumba vandha thaanaaga connect aagi,
+  offline-la seitha velaigal merge aagum. Data ezhappu varaadhu.
+- Data ovvoru computer-lum thaniya save aagum (local), network illaatha podhum software velai seiyum.
+- Computer clock-um ore nerathula irukkattum (Network sync tab clock warning kaatum).
+
+CONNECT AAGALA-NA CHECKLIST
+1. Rendu computer-lum ORE PIN, ORE port (default 45873), software open.
+2. Windows Firewall: Network sync -> "Open Windows Firewall" -> Moi Tracker -> Private + Public tick.
+3. Rendu computer-um ORE router/WiFi-la irukka? (Guest WiFi / AP isolation block pannum.)
+4. NetBird-na: NetBird status "Connected", IP correct-aa?
+5. Port-ai vera program use pannaa tab-la red message varum -> port maathunga (rendu computer-lum same).
+
+WINDOWS 7 -> 11
+- Setup file 64-bit and 32-bit rendukkum (installer thaaney theriyum). Windows 7 SP1, 8, 8.1, 10, 11 support.
+- Windows 7/8: software rendering mode thaanaaga on (black screen varaadhu). Windows 7-ku "Windows 7 SP1" venum.
+- NetBird app puthu Windows-ku thaan (Windows 7-la run aagaadhu endra ennam) - Windows 7-la WiFi / LAN use pannunga.
+
+WINDOWS DEFENDER / SMARTSCREEN
+- Software-la hidden script, auto-start, registry, admin tricks onnum illa. Network use mattum (sync) - normal.
+- Ungal "Moi Tracker-Setup.exe" CODE-SIGN pannala-na SmartScreen "Windows protected your PC" kaatalaam:
+  "More info" -> "Run anyway". Idhu virus alla; signature illaadha puthu file-ku varum.
+- Idhai muzhuthaa thavirka: code-signing certificate vaanga (SSL.com / Certum / Azure Trusted Signing),
+  GitHub repo -> Settings -> Secrets -> CSC_LINK (pfx base64) and CSC_KEY_PASSWORD add pannunga. Build thaanaaga sign pannum.
+- Defender thappaa block pannina: https://www.microsoft.com/wdsi/filesubmission -> file submit pannunga (false positive).
+  Appo varai: Windows Security -> Virus & threat protection -> Manage settings -> Exclusions -> install folder add pannalaam.
