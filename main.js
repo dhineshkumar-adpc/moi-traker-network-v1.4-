@@ -129,7 +129,9 @@ ipcMain.handle('lan:connectAll',L(()=>lan.connectAll()));
 ipcMain.handle('lan:disconnectAll',L(()=>lan.disconnectAll()));
 ipcMain.handle('lan:scan',L(()=>lan.scan()));
 ipcMain.handle('lan:syncNow',L(()=>lan.syncNow()));
-ipcMain.handle('lan:push',L(s=>{lan.push(s);return true}));
+ipcMain.handle('lan:push',L((s,d)=>{lan.push(s,d);return true}));
+ipcMain.handle('lan:start',L(()=>{lan.start();return lan.status()}));
+ipcMain.handle('lan:stop',L(()=>{lan.stop();return lan.status()}));
 ipcMain.handle('lan:take',L(()=>lan.take()));
 ipcMain.handle('lan:firewall',L(()=>new Promise(res=>{
   // opens the normal Windows "Allowed apps" screen (no hidden scripts, nothing elevated by us) - user ticks Moi Tracker for Private + Public
